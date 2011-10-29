@@ -1,4 +1,7 @@
 
+This implements a toolkit for implementing the
+[Google Safe Browsing API v2](http://code.google.com/apis/safebrowsing/)
+
 The lib directory contains the pieces you'll need to assemble to match
 your enivroment:
 
