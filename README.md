@@ -1,24 +1,27 @@
 
 The lib directory contains the pieces you'll need to assemble to match
-your enivonrment:
+your enivroment:
 
-| lib/GSB_Client.php    | The client to test if a URL is blacklisted |
-| lib/GSB_Exception.php | An empty class to namespace our exceptions |
-| lib/GSB_Logger.php    | A really simple logger.  Ideally you'd subclass to modify for your environment |
-| lib/GSB_Request.php   | All network (http) calls are here |
-| lib/GSB_Storage.php   | Every database query is here, wrapper up in a function |
-| lib/GSB_Updater.php   | Updates the local GSB database |
-| lib/GSB_URL.php       | URL cannonicalization |
+<table>
+<tr><td> lib/GSB_Client.php </td><td> The client to test if a URL is blacklisted </td></tr>
+<tr><td> lib/GSB_Exception.php </td><td> An empty class to namespace our exceptions </td></tr>
+<tr><td> lib/GSB_Logger.php    </td><td> A really simple logger.  Ideally you'd subclass to modify for your environment  </td></tr>
+<tr><td> lib/GSB_Request.php   </td><td> All network (http) calls are here  </td></tr>
+<tr><td> lib/GSB_Storage.php   </td><td> Every database query is here, wrapper up in a function  </td></tr>
+<tr><td> lib/GSB_Updater.php   </td><td> Updates the local GSB database  </td></tr>
+<tr><td> lib/GSB_URL.php       </td><td> URL cannonicalization  </td></tr>
+</table>
 
 bin-sample shows how this might be done.  You'll want to rewrite these for match your environment:
 
-| bin-sample/intro.php  | common code for both lookup and updater |
-| bin-sample/lookup.php | CLI to test a URL |
-| bin-sample/update.php | code to update the local GSB database |
-| bin-sample/cron.sh    | shows how update might be run periodicially |
+<table>
+<tr><td> bin-sample/intro.php  </td><td> common code for both lookup and updater </td></tr>
+<tr><td> bin-sample/lookup.php </td><td> CLI to test a URL </td></tr>
+<tr><td> bin-sample/update.php </td><td> code to update the local GSB database </td></tr>
+<tr><td> bin-sample/cron.sh    </td><td> shows how update might be run periodicially </td></tr>
+</table>
 
-The short story is for a lookup, you'll want
-
+The URL lookup and the local database update shares common code:
 
     $api = 'YOUR-API-KEY-HERE';
     $gsblists = array('goog-malware-shavar', 'googpub-phish-shavar');
@@ -32,12 +35,15 @@ The short story is for a lookup, you'll want
     $network = new GSB_Request($api);
     $logger  = new GSB_Logger(5);
 
+
+To make URL checker:
+
     // make the client with the pieces, and test
     $client  = new GSB_Client($storage, $network, $logger);
     $client->lookup('A URL');
 
-or for the database updater:
+To make a database updater:
 
-   $x = new GSB_Updater($storage, $network, $logger);
-   $x->downloadData($gsblists, FALSE);
-   $storage->fullhash_delete_old();
+    $x = new GSB_Updater($storage, $network, $logger);
+    $x->downloadData($gsblists, FALSE);
+    $storage->fullhash_delete_old();
