@@ -135,33 +135,36 @@ class GSB_Storage {
         return $chunks;
     }
 
-    function hostkey_select_prefixes($hostkey) {
-        $stmt = $this->prepare('SELECT * FROM gsb_add WHERE host_key = ?');
-        $stmt->bindParam(1, $hostkey);
+    /**
+     * Finds all prefixes the matches the host key.
+     *
+     * @param array[int]string|string $hostkeys
+     * @return multitype:|array
+     */
+    function hostkey_select_prefixes($hostkeys) {
+        // build the where clause
+        if (empty($hostkeys)) {
+            return array();
+        } else if (is_array($hostkeys)) {
+            $where = "WHERE a.host_key IN ('".implode("','", $hostkeys)."') ";
+        } else {
+            $where = "WHERE a.host_key = '$hostkeys' ";
+        }
+
+        // build the query, filter out lists that were "subtracted"
+        $stmt = $this->prepare(
+            'SELECT a.* FROM gsb_add a '.
+            'LEFT OUTER JOIN gsb_sub s '.
+            '    ON s.list_id        = a.list_id '.
+            '    AND s.host_key      = a.host_key '.
+            '    AND s.add_chunk_num = a.add_chunk_num '.
+            '    AND s.prefix        = a.prefix '.
+            $where.
+            'AND s.sub_chunk_num IS NULL');
+
         $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $result = array();
-        if (count($rows) == 0) {
-            return $result;
-        }
 
-        // filter out matches in the sub list
-        $stmt = $this->prepare('SELECT count(*) from gsb_sub WHERE list_id=? AND add_chunk_num=? AND host_key=? AND prefix=?');
-
-        foreach ($rows as $row) {
-            $stmt->bindParam(1, $row['list_id']);
-            $stmt->bindParam(2, $row['add_chunk_num']);
-            $stmt->bindParam(3, $row['host_key']);
-            $stmt->bindParam(4, $row['prefix']);
-            $stmt->execute();
-            $count = $stmt->fetchColumn();
-            if ((int)$count == 0) {
-                $result[] = $row;
-            } else {
-                //print "Not using due to being in sub list";
-            }
-        }
-        return $result;
+        return (array) $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     function add_insert(&$data) {

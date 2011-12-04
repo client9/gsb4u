@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Updater.php';
+require_once 'GSB_Updater.php';
 
 class GSB_UpdaterTests extends PHPUnit_Framework_TestCase {
 
@@ -14,6 +14,29 @@ EOT;
 
         $result = GSB_Updater::parseDownloadResponse($raw);
         print_r($result);
+    }
+
+    function testNetwork2Int() {
+        $str = "\0\0\0\0";
+        $val = GSB_Updater::network2int($str);
+        $this->assertEquals(0, $val);
+
+        $str = "\0\0\0\1";
+        $val = GSB_Updater::network2int($str);
+        $this->assertEquals(1, $val);
+
+        $str = "\1\0\0\0";
+        $val = GSB_Updater::network2int($str);
+        $this->assertEquals(16777216, $val);
+
+        // now test failure case
+        $str = "\0\0\0";
+        try {
+            $val = GSB_Updater::network2int($str);
+            $this->assertTrue(FALSE);
+        } catch (GSB_Exception $e) {
+            $this->assertTrue(TRUE);
+        }
     }
 
     function testListToRange() {
@@ -33,6 +56,7 @@ EOT;
         $str = GSB_Updater::list2range($vals);
         $this->assertEquals('1', $str);
     }
+
     function testRangeToList() {
         $s = '93865-93932';
         $expected = array(
