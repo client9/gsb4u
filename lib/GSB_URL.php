@@ -22,6 +22,7 @@ class GSB_UrlUtil {
         }
         return implode('', $out);
     }
+
     public static function escape($s) {
         $unquoted = rawurldecode($s);
         while ($unquoted != $s) {
@@ -32,6 +33,7 @@ class GSB_UrlUtil {
 
         return $s;
     }
+
     /**
      * Canonicalizes a full URL according to Google's definition.
      *
@@ -53,16 +55,16 @@ class GSB_UrlUtil {
 
         $finalurl = $url;
 
-        // strip off fragment
+        // Strip off fragment
         $pos = strpos($url, '#');
         if ($pos !== FALSE) {
             $finalurl = substr($url, 0, $pos);
         }
 
-        // strip off leading and trailing white space
+        // Strip off leading and trailing white space
         $finalurl = trim($finalurl);
 
-        //Remove line feeds, return carriages, tabs, vertical tabs
+        // Remove line feeds, return carriages, tabs, vertical tabs
         $finalurl = str_replace(array("\x09", "\x0A", "\x0D", "\x0B"), '', $finalurl);
 
         $finalurl = self::escape($finalurl);
@@ -72,20 +74,20 @@ class GSB_UrlUtil {
             $finalurl = 'http://' . $finalurl;
         }
 
-        //Now extract hostname & path
+        // Now extract hostname & path
         // parse_url is noisy prior to php 5.3.3.  Need to silence with '@'
         $parts = @parse_url($finalurl);
 
         $hostname = self::escape($parts['host']);
 
-        //Deal with hostname first
-        //Replace all leading and trailing dots
+        // Deal with hostname first
+        // Replace all leading and trailing dots
         $hostname = trim($hostname, '.');
 
-        //Replace all consecutive dots with one dot
+        // Replace all consecutive dots with one dot
         $hostname = preg_replace('/\.{2,}/', '.', $hostname);
 
-        //Make it lowercase
+        // Make it lowercase
         $hostname = strtolower($hostname);
 
         if (is_numeric($hostname)) {
@@ -179,23 +181,23 @@ class GSB_UrlUtil {
             $fullhash = self::sha256($value);
             $returnprefixes[$fullhash] = array(
                 'original' => $value,
-                'prefix' => substr($fullhash, 0, 8),
-                'hash' => $fullhash);
+                'prefix'   => substr($fullhash, 0, 8),
+                'hash'     => $fullhash);
         }
         return $returnprefixes;
     }
 
     /**
-     * constructe URL paths given the query parameters
+     * construct URL paths given the query parameters
      *
      * @param string $path
      * @param string $query
-     * @return multitype: sring
+     * @return multitype: string
      */
     static function makePaths($path, $query) {
         $p = array();
         if (!is_null($query)) {
-            array_push($p, $path.'?'.$query);
+            array_push($p, $path . '?' . $query);
         }
         array_push($p, $path);
 
@@ -205,11 +207,13 @@ class GSB_UrlUtil {
 
         array_push($p, '/');
         $parts = explode('/', $path);
-        $len = count($parts) -1;
+        $len = count($parts) - 1;
+
         // handle case where path ends in a '/' already
         if (empty($parts[$len])) {
             $len -= 1;
         }
+
         // no more than 3 of these (we already have '/' already, so 4 total)
         $len = min($len, 3);
 
@@ -251,16 +255,17 @@ class GSB_UrlUtil {
      * @return multitype:string
      */
     static function makePrefixesHashes($host, $path, $query, $usingip) {
-        return self::makeHashes(self::makePrefixes($host, $path, $query, $usingip));
+        $prefixes = self::makePrefixes($host, $path, $query, $usingip);
+        return self::makeHashes($prefixes);
     }
 
     /**
      *  Makes the host keys for initial lookup
      *
      *  maps 1.2.3.4 => ( 1.2.3.4 ) (ip address)
-     *          b.a  => ( b.a )
-     *        c.b.a  => ( c.b.a, b.a )
-     *      d.c.b.a  => ( c.b.a, b.a )  (only 2 dots)
+     *           b.a => ( b.a )
+     *         c.b.a => ( c.b.a, b.a )
+     *       d.c.b.a => ( c.b.a, b.a )  (only 2 dots)
      *
      */
     static function makeHostList($host, $usingip) {
@@ -290,7 +295,7 @@ class GSB_UrlUtil {
             $hostparts = explode('.', $host);
             // TRICKY... make sure domain has at least one dot, and no
             // more than 4.
-            $len = count($hostparts)-1;
+            $len = count($hostparts) - 1;
             for ($i = max(1, $len - 4); $i < $len; ++$i) {
                 array_push($hosts, implode('.', array_slice($hostparts, $i)));
             }
@@ -324,10 +329,10 @@ class GSB_UrlUtil {
     }
 
     /**
-     * SHA-256 input (short method).
+     * SHA-256 input
      *
      * @param string $data
-     * @return string
+     * @return hex-encoded sha256 string
      */
     static function sha256($data) {
         return hash('sha256', $data);

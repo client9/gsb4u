@@ -22,8 +22,12 @@ class GSB_Updater {
         $this->log = $logger;
     }
 
-    // convert network order bytes to a php int
-    function network2int($str) {
+    /** convert network order bytes to a php int
+     *
+     * @param $str string  binary string of exactly 4 bytes
+     * @return int unsigned integer
+     */
+    static function network2int($str) {
         if (strlen($str) != 4) {
             throw new GSB_Exception("trying to convert to binary failed");
         }
@@ -152,7 +156,7 @@ class GSB_Updater {
                 );
                 break;
             case 'e':
-                if ($parts[1] = 'pleaserekey') {
+                if ($parts[1] == 'pleaserekey') {
                     $result[] = array(
                         'action' => 'rekey'
                     );
@@ -265,8 +269,8 @@ class GSB_Updater {
                     'action' => 'sub_insert',
                     'listname' => $listname,
                     'sub_chunk_num' => $sub_chunk_num,
-                    'add_chunk_num' => $this->network2int(substr($raw,
-                                                                 $offset, 4)),
+                    'add_chunk_num' => self::network2int(substr($raw,
+                                                                $offset, 4)),
                     'host_key' => $hostkey,
                     'prefix' => $hostkey
                 );
@@ -277,9 +281,9 @@ class GSB_Updater {
                         'action' => 'sub_insert',
                         'listname' => $listname,
                         'sub_chunk_num' => $sub_chunk_num,
-                        'add_chunk_num' => $this->network2int(substr($raw,
-                                                                     $offset,
-                                                                     4)),
+                        'add_chunk_num' => self::network2int(substr($raw,
+                                                                    $offset,
+                                                                    4)),
                         'host_key' => $hostkey,
                         'prefix' => bin2hex(substr($raw, $offset+4, $hashlen))
                     );

@@ -13,7 +13,7 @@ class GSB_ClientTests extends PHPUnit_Framework_TestCase {
                 'hash' => bin2hex('0123456789')
             )
         );
-        $a = GSB_Client::processFullLookup($raw);
+        $a = GSB_Client::parseFullhashResponse($raw);
         $this->assertEquals($expected, $a);
 
         $expected = array(
@@ -30,7 +30,7 @@ class GSB_ClientTests extends PHPUnit_Framework_TestCase {
         );
 
         $raw = "foobar:20:10\n0123456789dingbat:30:9\n123456789";
-        $a = GSB_Client::processFullLookup($raw);
+        $a = GSB_Client::parseFullhashResponse($raw);
         $this->assertEquals($expected, $a);
     }
 }

@@ -7,8 +7,28 @@ require_once 'GSB_URL.php';
  */
 class GSB_UrlUtilTests extends PHPUnit_Framework_TestCase {
 
+    public function testSha256() {
+        // FIPS-180-2 example B.1
+        $str = "abc";
+        $val = GSB_UrlUtil::sha256($str);
+        $e="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+        $this->assertEquals($e, $val);
+
+        // FIPS-180-2 example B.2
+        $str = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+        $val = GSB_UrlUtil::sha256($str);
+        $e ="248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1";
+        $this->assertEquals($e, $val);
+
+        // FIPS-180-3 example B.3
+        $str = str_repeat("a", 1000000);
+        $val = GSB_UrlUtil::sha256($str);
+        $e = "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0";
+        $this->assertEquals($e, $val);
+    }
+
     /**
-     * 
+     *
      */
     public function testmakeHostList() {
         $ary = GSB_UrlUtil::makeHostList('foo', false);
@@ -52,10 +72,10 @@ class GSB_UrlUtilTests extends PHPUnit_Framework_TestCase {
      * Tests the function to explode a given URL to different forms
      */
     function testMakePaths() {
-        $a = GSB_UrlUtil::makePaths('/', '');
+        $a = GSB_UrlUtil::makePaths('/', NULL);
         $this->assertEquals(array('/'), $a);
 
-        $a = GSB_UrlUtil::makePaths('/1', '');
+        $a = GSB_UrlUtil::makePaths('/1', NULL);
         $this->assertEquals(array('/1', '/'), $a);
 
         $a = GSB_UrlUtil::makePaths('/1/2.html', 'param=1');
@@ -105,16 +125,15 @@ class GSB_UrlUtilTests extends PHPUnit_Framework_TestCase {
             'f.g/1.html',
             'f.g/'
         );
-        $a = GSB_UrlUtil::makePrefixes('a.b.c.d.e.f.g', '/1.html', '', false);
+        $a = GSB_UrlUtil::makePrefixes('a.b.c.d.e.f.g', '/1.html', NULL, false);
         $this->assertEquals($expected, $a);
 
         $expected = array(
             '1.2.3.4/1/',
             '1.2.3.4/'
         );
-        $a = GSB_UrlUtil::makePrefixes('1.2.3.4', '/1/', '', true);
+        $a = GSB_UrlUtil::makePrefixes('1.2.3.4', '/1/', NULL, true);
         $this->assertEquals($expected, $a);
-
     }
 
     /**
